@@ -1,0 +1,60 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Coinbase",
+        "description": "Enter your Coinbase Developer Platform (CDP) API key credentials. Create a key at [Coinbase Developer Platform](https://portal.cdp.coinbase.com/access/api).",
+        "data": {
+          "api_key_name": "API key name",
+          "api_private_key": "Private key (PEM)",
+          "name": "Account name"
+        },
+        "data_description": {
+          "api_key_name": "The key name in the format `organizations/{org-id}/apiKeys/{key-id}`.",
+          "api_private_key": "The EC private key PEM block from the CDP portal. Paste the full PEM including `-----BEGIN EC PRIVATE KEY-----` and `-----END EC PRIVATE KEY-----`."
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Coinbase Wallet",
+        "description": "Update your CDP API credentials. Leave the private key blank to keep the current value.",
+        "data": {
+          "api_key_name": "API key name",
+          "api_private_key": "Private key (leave blank to keep current)",
+          "name": "Account name"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to reach the Coinbase API. Check network connectivity.",
+      "invalid_auth": "Authentication failed. Verify your API key name and private key.",
+      "unknown": "Unexpected error. Check the logs for details."
+    },
+    "abort": {
+      "already_configured": "This Coinbase API key is already configured.",
+      "reconfigure_successful": "Configuration updated successfully."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Coinbase Wallet options",
+        "data": {
+          "scan_interval": "Update interval (seconds)"
+        },
+        "data_description": {
+          "scan_interval": "How often to poll Coinbase for updated balances and transactions. Minimum 300 s. Default is 3600 s (1 h)."
+        }
+      }
+    }
+  },
+  "issues": {
+    "auth_failed": {
+      "title": "Coinbase authentication failed for {account_name}",
+      "description": "Home Assistant could not authenticate to Coinbase for **{account_name}**.\n\nYour CDP API key may have been revoked or expired. Go to the [Coinbase Developer Platform](https://portal.cdp.coinbase.com/access/api), create a new key, then use **Reconfigure** to update the credentials."
+    },
+    "cannot_connect": {
+      "title": "Cannot reach Coinbase API for {account_name}",
+      "description": "Home Assistant failed to connect to the Coinbase API for **{account_name}**.\n\nCheck network connectivity, then go to **Settings → Devices & services → {account_name}** and select **Reload**."
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "domain": "coinbase_wallet",
+  "name": "Coinbase Wallet",
+  "codeowners": [
+    "@pschmitt"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/pschmitt/homeassistant-coinbase-wallet",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/pschmitt/homeassistant-coinbase-wallet/issues",
+  "loggers": [
+    "custom_components.coinbase_wallet"
+  ],
+  "requirements": [
+    "requests>=2.28.0"
+  ],
+  "version": "0.1.0"
+}
