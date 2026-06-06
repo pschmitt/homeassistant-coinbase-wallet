@@ -54,7 +54,7 @@ def _build_schema(
             TextSelectorConfig(multiline=True, type=TextSelectorType.PASSWORD)
         )
     if show_name:
-        fields[vol.Optional(CONF_NAME, default=defaults.get(CONF_NAME, "Coinbase"))] = TextSelector()
+        fields[vol.Optional(CONF_NAME, default=defaults.get(CONF_NAME, "Coinbase Wallet"))] = TextSelector()
     return vol.Schema(fields)
 
 
@@ -78,7 +78,7 @@ class CoinbaseWalletConfigFlow(ConfigFlow, domain=DOMAIN):
                 CONF_API_KEY_NAME: user_input[CONF_API_KEY_NAME].strip(),
                 CONF_API_PRIVATE_KEY: user_input[CONF_API_PRIVATE_KEY],
             }
-            name = user_input.get(CONF_NAME) or "Coinbase"
+            name = user_input.get(CONF_NAME) or "Coinbase Wallet"
             try:
                 await _validate(self.hass, data)
             except CoinbaseWalletAuthError:

@@ -35,12 +35,14 @@ def _make_jwt(key_name: str, private_key_pem: str, method: str, path: str) -> st
 
     now = int(time.time())
     header = {"alg": "ES256", "kid": key_name, "nonce": os.urandom(16).hex(), "typ": "JWT"}
+    # Coinbase CDP validates the uri claim against the path without query string
+    path_no_qs = path.split("?")[0]
     claims = {
         "sub": key_name,
         "iss": "cdp",
         "nbf": now,
         "exp": now + 120,
-        "uri": f"{method} api.coinbase.com{path}",
+        "uri": f"{method} api.coinbase.com{path_no_qs}",
     }
     signing_input = f"{_b64url(header)}.{_b64url(claims)}".encode()
     sig_der = key.sign(signing_input, ec.ECDSA(hashes.SHA256()))
@@ -92,6 +94,8 @@ class CoinbaseWalletData:
     account_name: str
     currency: str
     balance: float
+    account_type: str = ""
+    address: str | None = None
     transactions: list[dict[str, Any]] = field(default_factory=list)
 
 
@@ -136,17 +140,33 @@ class CoinbaseWalletApiClient:
                 continue
             account_id = acct["id"]
             currency = acct["balance"]["currency"]
+            account_type = acct.get("type", "")
             transactions = self._fetch_transactions(account_id, currency)
+            address = self._fetch_address(account_id, currency, account_type)
 
             result[account_id] = CoinbaseWalletData(
                 account_id=account_id,
                 account_name=acct.get("name", currency),
                 currency=currency,
                 balance=balance,
+                account_type=account_type,
+                address=address,
                 transactions=transactions,
             )
 
         return result
+
+    def _fetch_address(self, account_id: str, currency: str, account_type: str) -> str | None:
+        if account_type == "fiat":
+            return None
+        try:
+            data = self._get(f"/v2/accounts/{account_id}/addresses?limit=1")
+            addresses = data.get("data", [])
+            if addresses:
+                return addresses[0].get("address")
+        except Exception as exc:
+            _LOGGER.debug("Could not fetch address for %s account %s: %s", currency, account_id, exc)
+        return None
 
     def _fetch_transactions(self, account_id: str, currency: str) -> list[dict[str, Any]]:
         try:

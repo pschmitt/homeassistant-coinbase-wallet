@@ -78,8 +78,11 @@ class CoinbaseBalanceSensor(CoinbaseWalletEntity, SensorEntity):
         w = self._wallet
         if w is None:
             return {}
-        return {
+        attrs: dict[str, Any] = {
             "account_id": w.account_id,
             "account_name": w.account_name,
             "transactions": w.transactions,
         }
+        if w.address is not None:
+            attrs["address"] = w.address
+        return attrs
