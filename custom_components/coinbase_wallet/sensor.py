@@ -42,7 +42,7 @@ async def async_setup_entry(
 class CoinbaseBalanceSensor(CoinbaseWalletEntity, SensorEntity):
     """Sensor for the balance of one Coinbase wallet."""
 
-    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_state_class = SensorStateClass.TOTAL
     _unrecorded_attributes = frozenset({"transactions"})
 
     def __init__(
