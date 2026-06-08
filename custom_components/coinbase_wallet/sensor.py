@@ -4,13 +4,24 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.components.sensor import SensorEntity, SensorStateClass
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .api import CoinbaseWalletData
-from .const import CURRENCY_ICONS, CURRENCY_PRECISION, DEFAULT_ICON, DEFAULT_PRECISION, DOMAIN
+from .const import (
+    CURRENCY_ICONS,
+    CURRENCY_PRECISION,
+    DEFAULT_ICON,
+    DEFAULT_PRECISION,
+    DOMAIN,
+    FIAT_CURRENCIES,
+)
 from .coordinator import CoinbaseWalletCoordinator
 from .entity import CoinbaseWalletEntity
 
@@ -59,6 +70,8 @@ class CoinbaseBalanceSensor(CoinbaseWalletEntity, SensorEntity):
         self._attr_suggested_display_precision = CURRENCY_PRECISION.get(
             wallet.currency, DEFAULT_PRECISION
         )
+        if wallet.currency in FIAT_CURRENCIES:
+            self._attr_device_class = SensorDeviceClass.MONETARY
 
     @property
     def _wallet(self) -> CoinbaseWalletData | None:

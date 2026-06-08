@@ -33,5 +33,9 @@ CURRENCY_PRECISION: dict[str, int] = {
     "EURC": 2,
     "USDC": 2,
 }
+# Fiat currencies (ISO 4217) get the monetary device class so the frontend
+# renders them with the proper currency symbol (e.g. "€ 135.00"). Crypto and
+# stablecoin balances (BTC, ETH, EURC, ...) keep their raw amount + ticker.
+FIAT_CURRENCIES: frozenset[str] = frozenset({"EUR", "USD", "GBP", "CHF", "JPY"})
 DEFAULT_ICON = "mdi:cash"
 DEFAULT_PRECISION = 4
