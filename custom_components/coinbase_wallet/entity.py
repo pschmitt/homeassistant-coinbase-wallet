@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
@@ -23,4 +23,5 @@ class CoinbaseWalletEntity(CoordinatorEntity[CoinbaseWalletCoordinator]):
             manufacturer="Coinbase",
             model="Coinbase CDP",
             configuration_url="https://www.coinbase.com/settings/api",
+            entry_type=DeviceEntryType.SERVICE,
         )
