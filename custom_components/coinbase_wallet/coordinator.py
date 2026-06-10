@@ -13,7 +13,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .api import CoinbaseWalletApiClient, CoinbaseWalletData
 from .const import DEFAULT_SCAN_INTERVAL, DOMAIN, REPAIR_AUTH_FAILED, REPAIR_CANNOT_CONNECT
-from .exceptions import CoinbaseWalletAuthError, CoinbaseWalletConnectionError
+from .exceptions import CoinbaseWalletAuthError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,13 +30,13 @@ class CoinbaseWalletCoordinator(DataUpdateCoordinator[dict[str, CoinbaseWalletDa
         super().__init__(
             hass,
             _LOGGER,
+            config_entry=config_entry,
             name=f"{DOMAIN}_{config_entry.entry_id}",
             update_interval=timedelta(
                 seconds=config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
             ),
         )
         self.client = client
-        self.config_entry = config_entry
 
     async def _async_update_data(self) -> dict[str, CoinbaseWalletData]:
         auth_issue = f"{REPAIR_AUTH_FAILED}_{self.config_entry.entry_id}"
@@ -50,22 +50,24 @@ class CoinbaseWalletCoordinator(DataUpdateCoordinator[dict[str, CoinbaseWalletDa
                 self.hass,
                 DOMAIN,
                 auth_issue,
-                is_fixable=True,
+                is_fixable=False,
                 severity=ir.IssueSeverity.ERROR,
                 translation_key=REPAIR_AUTH_FAILED,
                 translation_placeholders={"account_name": name},
             )
+            ir.async_delete_issue(self.hass, DOMAIN, conn_issue)
             raise UpdateFailed(f"Coinbase auth failed for {name}: {err}") from err
-        except (CoinbaseWalletConnectionError, Exception) as err:
+        except Exception as err:
             ir.async_create_issue(
                 self.hass,
                 DOMAIN,
                 conn_issue,
-                is_fixable=True,
+                is_fixable=False,
                 severity=ir.IssueSeverity.WARNING,
                 translation_key=REPAIR_CANNOT_CONNECT,
                 translation_placeholders={"account_name": name},
             )
+            ir.async_delete_issue(self.hass, DOMAIN, auth_issue)
             raise UpdateFailed(f"Coinbase connection error for {name}: {err}") from err
 
         ir.async_delete_issue(self.hass, DOMAIN, auth_issue)
