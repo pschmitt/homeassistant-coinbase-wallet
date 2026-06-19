@@ -5,7 +5,7 @@ from __future__ import annotations
 from homeassistant.const import Platform
 
 DOMAIN = "coinbase_wallet"
-PLATFORMS: list[Platform] = [Platform.SENSOR]
+PLATFORMS: list[Platform] = [Platform.EVENT, Platform.SENSOR]
 
 CONF_API_KEY_NAME = "api_key_name"
 CONF_API_PRIVATE_KEY = "api_private_key"
