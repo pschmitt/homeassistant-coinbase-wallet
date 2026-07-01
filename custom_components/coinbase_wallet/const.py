@@ -30,7 +30,7 @@ CURRENCY_PRECISION: dict[str, int] = {
     "BTC": 8,
     "ETH": 6,
     "EUR": 2,
-    "EURC": 2,
+    "EURC": 4,
     "USDC": 2,
 }
 # Fiat currencies (ISO 4217) get the monetary device class so the frontend
