@@ -43,6 +43,8 @@ async def async_setup_entry(
                 continue
             known_accounts.add(account_id)
             new.append(CoinbaseBalanceSensor(coordinator=coordinator, wallet=wallet))
+            if wallet.currency not in FIAT_CURRENCIES:
+                new.append(CoinbaseProfitLossSensor(coordinator=coordinator, wallet=wallet))
         if new:
             async_add_entities(new)
 
@@ -99,3 +101,63 @@ class CoinbaseBalanceSensor(CoinbaseWalletEntity, SensorEntity):
         if w.address is not None:
             attrs["address"] = w.address
         return attrs
+
+
+class CoinbaseProfitLossSensor(CoinbaseBalanceSensor):
+    """Coinbase-reported unrealized gain or loss for one crypto wallet."""
+
+    _attr_device_class = SensorDeviceClass.MONETARY
+    _attr_state_class = SensorStateClass.TOTAL
+
+    def __init__(
+        self,
+        coordinator: CoinbaseWalletCoordinator,
+        wallet: CoinbaseWalletData,
+    ) -> None:
+        super().__init__(coordinator, wallet)
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}:{wallet.account_id}:pnl"
+        self._attr_name = f"{wallet.currency} PnL"
+        self._attr_icon = "mdi:chart-line"
+        self._attr_suggested_display_precision = 2
+        self._attr_native_unit_of_measurement = None
+
+    @property
+    def _position(self) -> dict[str, Any]:
+        wallet = self._wallet
+        return (wallet.position or {}) if wallet else {}
+
+    @property
+    def available(self) -> bool:
+        return (
+            super().available
+            and self._position.get("unrealized_pnl") is not None
+            and bool(self.native_unit_of_measurement)
+        )
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        return (self._position.get("cost_basis") or {}).get("currency")
+
+    @property
+    def native_value(self) -> float | None:
+        value = self._position.get("unrealized_pnl")
+        return float(value) if value is not None else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        position = self._position
+        basis = (position.get("cost_basis") or {}).get("value")
+        average = (position.get("average_entry_price") or {}).get("value")
+        cost = float(basis) if basis is not None else None
+        pnl = self.native_value
+        return {
+            "account_id": self._account_id,
+            "pnl_type": "unrealized",
+            "source": "Coinbase portfolio breakdown",
+            "cost_basis": cost,
+            "average_buy_in": float(average) if average is not None else None,
+            "market_value": position.get("total_balance_fiat"),
+            "gain_loss_percent": round(pnl / cost * 100, 2)
+            if pnl is not None and cost
+            else None,
+        }

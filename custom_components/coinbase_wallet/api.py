@@ -13,7 +13,12 @@ from typing import Any
 import requests
 
 from .const import DEFAULT_REQUEST_TIMEOUT, MAX_TRANSACTIONS
-from .exceptions import CoinbaseWalletApiError, CoinbaseWalletAuthError, CoinbaseWalletConnectionError
+from .exceptions import (
+    CoinbaseWalletApiError,
+    CoinbaseWalletAuthError,
+    CoinbaseWalletConnectionError,
+    CoinbaseWalletError,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -97,6 +102,7 @@ class CoinbaseWalletData:
     account_type: str = ""
     address: str | None = None
     transactions: list[dict[str, Any]] = field(default_factory=list)
+    position: dict[str, Any] | None = None
 
 
 class CoinbaseWalletApiClient:
@@ -132,6 +138,7 @@ class CoinbaseWalletApiClient:
     def fetch_data(self) -> dict[str, CoinbaseWalletData]:
         """Fetch all non-empty wallets with their recent transactions."""
         data = self._get("/v2/accounts?limit=100")
+        positions = self._fetch_positions()
         result: dict[str, CoinbaseWalletData] = {}
 
         for acct in data.get("data", []):
@@ -152,9 +159,25 @@ class CoinbaseWalletApiClient:
                 account_type=account_type,
                 address=address,
                 transactions=transactions,
+                position=positions.get(account_id),
             )
 
         return result
+
+    def _fetch_positions(self) -> dict[str, dict[str, Any]]:
+        """Fetch Coinbase's cost basis and unrealized P&L, including staked funds."""
+        try:
+            portfolios = self._get("/api/v3/brokerage/portfolios")
+            positions: dict[str, dict[str, Any]] = {}
+            for portfolio in portfolios.get("portfolios", []):
+                data = self._get(f"/api/v3/brokerage/portfolios/{portfolio['uuid']}")
+                for position in data.get("breakdown", {}).get("spot_positions", []):
+                    positions[position["account_uuid"]] = position
+            return positions
+        except (CoinbaseWalletError, KeyError, TypeError, ValueError) as exc:
+            # Portfolio access must not interrupt wallet balances or transaction events.
+            _LOGGER.warning("Failed to fetch Coinbase portfolio P&L: %s", exc)
+            return {}
 
     def _fetch_address(self, account_id: str, currency: str, account_type: str) -> str | None:
         if account_type == "fiat":

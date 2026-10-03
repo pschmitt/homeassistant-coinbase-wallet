@@ -13,6 +13,8 @@ balances and transaction history as sensor entities.
 - One Home Assistant **device** per Coinbase account / API key
 - One **balance sensor** per non-empty wallet (BTC, ETH, EUR, EURC, …), created dynamically
 - Rich sensor attributes: `account_name`, `account_id`, `transactions` (last 50)
+- Unrealized **PnL sensor** per crypto wallet, using Coinbase's portfolio cost
+  basis and P&L directly (including staked holdings)
 - Configurable via the HA UI — no YAML needed
 - Options flow to adjust the poll interval
 - Reconfigure flow to update API credentials without deleting the entry
@@ -61,6 +63,13 @@ One sensor is created per non-empty Coinbase wallet:
 | `sensor.<name>_eur` | EUR balance | same |
 | `sensor.<name>_eurc` | EURC balance | same |
 | `sensor.<name>_<currency>` | balance | same |
+| `sensor.<name>_<currency>_pnl` | Unrealized P&L in native fiat currency | `cost_basis`, `average_buy_in`, `market_value`, `gain_loss_percent` |
+
+PnL reflects current holdings, excluding realized gains from past sales. Values
+come from the Advanced Trade portfolio breakdown API, rather than being calculated
+from the limited transaction history. The sensor uses the fiat currency reported
+by Coinbase and becomes unavailable if portfolio data cannot be retrieved (for
+example, if the API key lacks portfolio read access); balances remain available.
 
 Transaction entries in the `transactions` attribute:
 
