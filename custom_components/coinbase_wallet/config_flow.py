@@ -6,7 +6,6 @@ import logging
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import HomeAssistant, callback
@@ -20,7 +19,13 @@ from homeassistant.helpers.selector import (
 )
 
 from .api import CoinbaseWalletApiClient
-from .const import CONF_API_KEY_NAME, CONF_API_PRIVATE_KEY, DEFAULT_SCAN_INTERVAL, DOMAIN, MIN_SCAN_INTERVAL
+from .const import (
+    CONF_API_KEY_NAME,
+    CONF_API_PRIVATE_KEY,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    MIN_SCAN_INTERVAL,
+)
 from .exceptions import CoinbaseWalletAuthError, CoinbaseWalletConnectionError
 
 _LOGGER = logging.getLogger(__name__)
@@ -46,15 +51,17 @@ def _build_schema(
         ): TextSelector(),
     }
     if key_required:
-        fields[vol.Required(CONF_API_PRIVATE_KEY, default=defaults.get(CONF_API_PRIVATE_KEY, ""))] = TextSelector(
-            TextSelectorConfig(multiline=True, type=TextSelectorType.PASSWORD)
-        )
+        fields[
+            vol.Required(CONF_API_PRIVATE_KEY, default=defaults.get(CONF_API_PRIVATE_KEY, ""))
+        ] = TextSelector(TextSelectorConfig(multiline=True, type=TextSelectorType.PASSWORD))
     else:
         fields[vol.Optional(CONF_API_PRIVATE_KEY)] = TextSelector(
             TextSelectorConfig(multiline=True, type=TextSelectorType.PASSWORD)
         )
     if show_name:
-        fields[vol.Optional(CONF_NAME, default=defaults.get(CONF_NAME, "Coinbase Wallet"))] = TextSelector()
+        fields[vol.Optional(CONF_NAME, default=defaults.get(CONF_NAME, "Coinbase Wallet"))] = (
+            TextSelector()
+        )
     return vol.Schema(fields)
 
 
@@ -68,9 +75,7 @@ class CoinbaseWalletConfigFlow(ConfigFlow, domain=DOMAIN):
     def async_get_options_flow(config_entry: ConfigEntry) -> CoinbaseWalletOptionsFlow:
         return CoinbaseWalletOptionsFlow(config_entry)
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         errors: dict[str, str] = {}
 
         if user_input is not None:
@@ -143,9 +148,7 @@ class CoinbaseWalletOptionsFlow(OptionsFlow):
     def __init__(self, config_entry: ConfigEntry) -> None:
         self._config_entry = config_entry
 
-    async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 

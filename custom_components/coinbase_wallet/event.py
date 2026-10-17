@@ -23,9 +23,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up per-wallet Coinbase last-transaction event entities."""
-    coordinator: CoinbaseWalletCoordinator = hass.data[DOMAIN][config_entry.entry_id][
-        "coordinator"
-    ]
+    coordinator: CoinbaseWalletCoordinator = hass.data[DOMAIN][config_entry.entry_id]["coordinator"]
     known_accounts: set[str] = set()
 
     @callback
@@ -108,7 +106,7 @@ class CoinbaseWalletTransactionEvent(CoinbaseWalletEntity, EventEntity):
 def _latest_transaction(wallet: CoinbaseWalletData) -> dict | None:
     best: dict | None = None
     best_created = ""
-    for tx in (wallet.transactions or []):
+    for tx in wallet.transactions or []:
         created = tx.get("created_at") or ""
         if created > best_created:
             best_created = created

@@ -3,14 +3,14 @@
     "step": {
       "user": {
         "title": "Connect to Coinbase",
-        "description": "Enter your Coinbase Developer Platform (CDP) API key credentials. Create a key at [Coinbase Developer Platform](https://portal.cdp.coinbase.com/access/api).",
+        "description": "Enter your Coinbase Developer Platform (CDP) API key credentials. Create a key in the Coinbase Developer Platform portal.",
         "data": {
           "api_key_name": "API key name",
           "api_private_key": "Private key (PEM)",
           "name": "Account name"
         },
         "data_description": {
-          "api_key_name": "The key name in the format `organizations/{org-id}/apiKeys/{key-id}`.",
+          "api_key_name": "The key name in the format `organizations/ORG_ID/apiKeys/KEY_ID`.",
           "api_private_key": "The EC private key PEM block from the CDP portal. Paste the full PEM including `-----BEGIN EC PRIVATE KEY-----` and `-----END EC PRIVATE KEY-----`."
         }
       },
@@ -50,7 +50,7 @@
   "issues": {
     "auth_failed": {
       "title": "Coinbase authentication failed for {account_name}",
-      "description": "Home Assistant could not authenticate to Coinbase for **{account_name}**.\n\nYour CDP API key may have been revoked or expired. Go to the [Coinbase Developer Platform](https://portal.cdp.coinbase.com/access/api), create a new key, then use **Reconfigure** to update the credentials."
+      "description": "Home Assistant could not authenticate to Coinbase for **{account_name}**.\n\nYour CDP API key may have been revoked or expired. Create a new key in the Coinbase Developer Platform portal, then use **Reconfigure** to update the credentials."
     },
     "cannot_connect": {
       "title": "Cannot reach Coinbase API for {account_name}",

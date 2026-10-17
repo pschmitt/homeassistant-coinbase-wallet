@@ -157,7 +157,5 @@ class CoinbaseProfitLossSensor(CoinbaseBalanceSensor):
             "cost_basis": cost,
             "average_buy_in": float(average) if average is not None else None,
             "market_value": position.get("total_balance_fiat"),
-            "gain_loss_percent": round(pnl / cost * 100, 2)
-            if pnl is not None and cost
-            else None,
+            "gain_loss_percent": round(pnl / cost * 100, 2) if pnl is not None and cost else None,
         }

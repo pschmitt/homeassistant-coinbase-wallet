@@ -188,7 +188,9 @@ class CoinbaseWalletApiClient:
             if addresses:
                 return addresses[0].get("address")
         except Exception as exc:
-            _LOGGER.debug("Could not fetch address for %s account %s: %s", currency, account_id, exc)
+            _LOGGER.debug(
+                "Could not fetch address for %s account %s: %s", currency, account_id, exc
+            )
         return None
 
     def _fetch_transactions(self, account_id: str, currency: str) -> list[dict[str, Any]]:
