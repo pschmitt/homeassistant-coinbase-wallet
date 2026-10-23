@@ -38,7 +38,7 @@ async def async_setup_entry(
     @callback
     def _add_missing() -> None:
         new: list[SensorEntity] = []
-        for account_id, wallet in coordinator.data.items():
+        for account_id, wallet in (coordinator.data or {}).items():
             if account_id in known_accounts:
                 continue
             known_accounts.add(account_id)
@@ -77,7 +77,7 @@ class CoinbaseBalanceSensor(CoinbaseWalletEntity, SensorEntity):
 
     @property
     def _wallet(self) -> CoinbaseWalletData | None:
-        return self.coordinator.data.get(self._account_id)
+        return (self.coordinator.data or {}).get(self._account_id)
 
     @property
     def available(self) -> bool:

@@ -109,12 +109,18 @@ class CoinbaseWalletApiClient:
     """Client for the Coinbase v2 REST API using CDP JWT authentication."""
 
     def __init__(self, key_name: str, private_key_pem: str) -> None:
+        self._poll_deadline: float | None = None
         self._key_name = key_name
         # Accept both real newlines and escaped \n from HA secrets.yaml
         self._private_key_pem = private_key_pem.replace("\\n", "\n")
 
     def _get(self, path: str) -> dict[str, Any]:
         """Issue an authenticated GET request."""
+        remaining = (
+            self._poll_deadline - time.monotonic() if self._poll_deadline is not None else 60
+        )
+        if remaining <= 0:
+            raise CoinbaseWalletConnectionError("Portfolio poll exceeded its 60 second budget")
         try:
             token = _make_jwt(self._key_name, self._private_key_pem, "GET", path)
         except Exception as exc:
@@ -124,7 +130,7 @@ class CoinbaseWalletApiClient:
             resp = requests.get(
                 f"{_API_BASE}{path}",
                 headers={"Authorization": f"Bearer {token}"},
-                timeout=DEFAULT_REQUEST_TIMEOUT,
+                timeout=min(DEFAULT_REQUEST_TIMEOUT, remaining),
             )
         except requests.RequestException as exc:
             raise CoinbaseWalletConnectionError(str(exc)) from exc
@@ -137,6 +143,7 @@ class CoinbaseWalletApiClient:
 
     def fetch_data(self) -> dict[str, CoinbaseWalletData]:
         """Fetch all non-empty wallets with their recent transactions."""
+        self._poll_deadline = time.monotonic() + 60
         data = self._get("/v2/accounts?limit=100")
         positions = self._fetch_positions()
         result: dict[str, CoinbaseWalletData] = {}
