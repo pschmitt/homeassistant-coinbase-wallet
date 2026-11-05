@@ -1,90 +1,48 @@
-# Coinbase Wallet for Home Assistant
+<p align="center">
+  <img src="logo.png" width="128" alt="Coinbase Wallet integration logo">
+</p>
 
-`coinbase_wallet` is a Home Assistant custom integration that connects to your
-[Coinbase](https://www.coinbase.com) account via the
-[CDP API](https://portal.cdp.coinbase.com/access/api) and exposes wallet
-balances and transaction history as sensor entities.
+<p align="center">
+  <a href="https://my.home-assistant.io/redirect/marketplace_repository/?owner=pschmitt&amp;repository=homeassistant-coinbase-wallet&amp;category=integration"><img src="https://my.home-assistant.io/badges/marketplace_repository.svg" alt="Open this integration in Home Assistant Marketplace"></a>
+</p>
 
-> **Note:** This integration coexists with the native `coinbase` HA integration
-> (used for live exchange rates). They use different domains and do not conflict.
+<h1 align="center">Coinbase Wallet for Home Assistant</h1>
+
+<p align="center">Track Coinbase wallet balances, transactions and unrealized profit or loss as sensors.</p>
+
+This integration uses the Coinbase Developer Platform (CDP) API. It coexists
+with Home Assistant's built-in `coinbase` exchange-rate integration under a
+different domain.
 
 ## Features
 
-- One Home Assistant **device** per Coinbase account / API key
-- One **balance sensor** per non-empty wallet (BTC, ETH, EUR, EURC, …), created dynamically
-- Rich sensor attributes: `account_name`, `account_id`, `transactions` (last 50)
-- Unrealized **PnL sensor** per crypto wallet, using Coinbase's portfolio cost
-  basis and P&L directly (including staked holdings)
-- Configurable via the HA UI — no YAML needed
-- Options flow to adjust the poll interval
-- Reconfigure flow to update API credentials without deleting the entry
-- Raises repair issues on auth failures or connectivity problems
+- **Wallet balances:** Create a sensor for each non-empty wallet, grouped by account device.
+- **Portfolio P&L:** Expose Coinbase's unrealized gain and cost basis for crypto holdings. See [Sensors](docs/sensors.md).
+- **Transactions:** Attach up to 50 recent transactions to each balance sensor.
+- **UI configuration:** Reconfigure credentials and polling interval without editing YAML; report authentication and connectivity issues through repairs.
 
-## Requirements
+## Install
 
-- A [Coinbase Developer Platform (CDP) API key](https://portal.cdp.coinbase.com/access/api)
-  with at least **Wallet › Read** permission.
+Use the Marketplace badge above on Home Assistant 2026.11 or later to add this
+repository as a custom integration. On older versions, add it as a HACS
+custom repository of type **Integration**. Install and restart Home Assistant.
+The badge does not imply a public catalog listing. For manual installation,
+copy `custom_components/coinbase_wallet/` into Home Assistant's
+`custom_components/` directory and restart.
 
-## Installation
+## Quick start
 
-### HACS (recommended)
+1. Create a [CDP API key](https://portal.cdp.coinbase.com/access/api) with at least **Wallet › Read** permission.
+2. Add **Coinbase Wallet** under **Settings → Devices & services → Add integration**.
+3. Enter the key name (`organizations/{org-id}/apiKeys/{key-id}`), full EC private key PEM and an optional account display name.
+4. Inspect the balance and P&L sensors for your wallets.
 
-[![Open this integration in Home Assistant Marketplace](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=pschmitt&repository=homeassistant-coinbase-wallet&category=integration)
+## Documentation
 
-1. Click the Marketplace badge above, or add
-   `https://github.com/pschmitt/homeassistant-coinbase-wallet` in HACS → Integrations
-   → ⋮ → Custom repositories as type **Integration**.
-2. Install **Coinbase Wallet**.
-3. Restart Home Assistant.
-
-### Manual
-
-Copy `custom_components/coinbase_wallet/` into your Home Assistant `custom_components/` directory,
-then restart.
-
-## Configuration
-
-1. Go to **Settings → Devices & services → Add integration**.
-2. Search for **Coinbase Wallet**.
-3. Fill in:
-   - **API key name** — the key identifier from the CDP portal, in the form
-     `organizations/{org-id}/apiKeys/{key-id}`.
-   - **Private key (PEM)** — the EC private key PEM block. Paste the full block
-     including `-----BEGIN EC PRIVATE KEY-----` and `-----END EC PRIVATE KEY-----`.
-   - **Account name** — display name for the HA device (default: `Coinbase`).
-
-## Sensors
-
-One sensor is created per non-empty Coinbase wallet:
-
-| Sensor | State | Key attributes |
-|--------|-------|----------------|
-| `sensor.<name>_btc` | BTC balance | `account_name`, `account_id`, `transactions` |
-| `sensor.<name>_eth` | ETH balance | same |
-| `sensor.<name>_eur` | EUR balance | same |
-| `sensor.<name>_eurc` | EURC balance | same |
-| `sensor.<name>_<currency>` | balance | same |
-| `sensor.<name>_<currency>_pnl` | Unrealized P&L in native fiat currency | `cost_basis`, `average_buy_in`, `market_value`, `gain_loss_percent` |
-
-PnL reflects current holdings, excluding realized gains from past sales. Values
-come from the Advanced Trade portfolio breakdown API, rather than being calculated
-from the limited transaction history. The sensor uses the fiat currency reported
-by Coinbase and becomes unavailable if portfolio data cannot be retrieved (for
-example, if the API key lacks portfolio read access); balances remain available.
-
-Transaction entries in the `transactions` attribute:
-
-| Field | Description |
+| Topic | Description |
 |-------|-------------|
-| `type` | `send`, `receive`, `buy`, `sell`, `fiat_deposit`, … |
-| `status` | `completed`, `pending`, … |
-| `amount` | Amount in the wallet's native currency (signed) |
-| `native_amount` | EUR equivalent (signed) |
-| `description` | Human-readable description |
-| `created_at` | ISO 8601 timestamp |
-| `to` / `from` | Counterparty (email, address, or name) |
-| `network_hash` | On-chain transaction hash (if applicable) |
+| [Sensors](docs/sensors.md) | Wallet balances, portfolio P&L and transaction attributes |
 
 ## License
 
-GPL-3.0-or-later — see [LICENSE](LICENSE).
+[GPL-3.0-or-later](LICENSE).
