@@ -29,10 +29,11 @@ balances and transaction history as sensor entities.
 
 ### HACS (recommended)
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=pschmitt&repository=homeassistant-coinbase-wallet&category=integration)
+[![Open this integration in Home Assistant Marketplace](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=pschmitt&repository=homeassistant-coinbase-wallet&category=integration)
 
-1. Click the badge above — or open HACS → Integrations → ⋮ → Custom repositories and add
-   `https://github.com/pschmitt/homeassistant-coinbase-wallet` as type **Integration**.
+1. Click the Marketplace badge above, or add
+   `https://github.com/pschmitt/homeassistant-coinbase-wallet` in HACS → Integrations
+   → ⋮ → Custom repositories as type **Integration**.
 2. Install **Coinbase Wallet**.
 3. Restart Home Assistant.
 
